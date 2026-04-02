@@ -1,0 +1,8 @@
+python-telegram-bot
+aiohttp
+beautifulsoup4
+lxml
+aiosqlite
+pydantic
+python-dotenv
+setuptools
