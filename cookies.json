@@ -1,0 +1,72 @@
+[
+  {
+    "name": "_ym_d",
+    "value": "1775206248",
+    "domain": ".perekrestok.ru",
+    "path": "/",
+    "expires": 1806992447,
+    "httpOnly": false,
+    "secure": true,
+    "sameSite": "None"
+  },
+  {
+    "name": "_ym_uid",
+    "value": "1775206248824362586",
+    "domain": ".perekrestok.ru",
+    "path": "/",
+    "expires": 1806992447,
+    "httpOnly": false,
+    "secure": true,
+    "sameSite": "None"
+  },
+  {
+    "name": "agreements",
+    "value": "j:{\"isAdultContentEnabled\":false,\"isAppAppInstallPromptClosed\":false}",
+    "domain": "www.perekrestok.ru",
+    "path": "/",
+    "expires": 1807000124,
+    "httpOnly": true,
+    "secure": false,
+    "sameSite": "Lax"
+  },
+  {
+    "name": "session",
+    "value": "%7B%22accessToken%22%3A%22eyJ0eXAiOiJKV1QiLCJhbGciOiJFUzUxMiJ9.eyJqdGkiOiJkNWFjMjdjOS02NzFiLTRhMzAtYmI3Ni02OWVkZDA5ZGMwZDIiLCJpYXQiOjE3NzUyMDY0NDcsImV4cCI6MTc3NTIzNTI0NywiZCI6ImU5ZTU3MjQ1LTA1ZjktNDdiMy04MGZmLWM0MmZhYTRjZDIwNiIsImFwaSI6IjEuNC4xLjAiLCJpcCI6Ijk0LjI1LjE2OS4zNyIsInUiOiI3OTBkMzczZS1jZTE0LTQyZjgtOWFmZi05ZjgxNDgzNjMzNmUiLCJ0IjoxfQ.AZ11CK9SkApbWl0t4W_f-WShaD4MzFLv9BrxK5fQkt9r7aDJBa1h7X3vB-Jysn0lOftCSSAE0HIszGDPqf2qRp6sAbXlRZsOvytkXblokGIdvBcQr0oA7Qg3sswLiV_Wzxkl-SuN_NHY66PC3aNVgv0TkdMli-WSD5fyVz28dXGiCpJa%22%2C%22refreshToken%22%3A%22eyJ0eXAiOiJKV1QiLCJhbGciOiJFUzUxMiJ9.eyJqdGkiOiIyMjk3Y2NmNi1lZDZhLTQ5NjQtYmQ4ZC1jYWQyNTg1OTJjODEiLCJpYXQiOjE3NzUyMDY0NDcsImV4cCI6MTc5MDc1ODQ0NywiZCI6ImU5ZTU3MjQ1LTA1ZjktNDdiMy04MGZmLWM0MmZhYTRjZDIwNiIsImFwaSI6IjEuNC4xLjAiLCJpcCI6Ijk0LjI1LjE2OS4zNyIsInUiOiI3OTBkMzczZS1jZTE0LTQyZjgtOWFmZi05ZjgxNDgzNjMzNmUiLCJ0IjoyfQ.AY_sH32eJ1SMgldP7S5bN6HBlSqd9KwwHjAT-j8I58OOX0_znMV_3VLXdfi0zZyX3I0Ah9F9l15TLrpRzOZrHg87AH3bTceVGmNehHd37lHRL9Si4zrEc6uVQovCbz0bRJTMPNUjrKz4BIuyK7EyU-gk_hCOm4tLfq7RUYCACKf-Zqxu%22%2C%22accessTokenExpiredAt%22%3A1775235247839%2C%22refreshTokenExpiredAt%22%3A1790758447839%2C%22device%22%3A%7B%22uuid%22%3A%22e9e57245-05f9-47b3-80ff-c42faa4cd206%22%7D%7D",
+    "domain": "www.perekrestok.ru",
+    "path": "/",
+    "expires": 1790844849,
+    "httpOnly": true,
+    "secure": false,
+    "sameSite": "Lax"
+  },
+  {
+    "name": "spid",
+    "value": "1775206174541_2a112703c68cd2ae572b3a6cbbef5ad5_1g86eb1i4hqtkwf7",
+    "domain": "www.perekrestok.ru",
+    "path": "/",
+    "expires": 1810007507,
+    "httpOnly": true,
+    "secure": false,
+    "sameSite": "None"
+  },
+  {
+    "name": "spjs",
+    "value": "1775215896682_1ee4ef74_013525ea_8639af79f988595a854c4715a5c6512c_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",
+    "domain": "www.perekrestok.ru",
+    "path": "/",
+    "expires": 1810007507,
+    "httpOnly": true,
+    "secure": false,
+    "sameSite": "None"
+  },
+  {
+    "name": "spsc",
+    "value": "1775215896682_764504949aed996d4f6351bc80ea55b4_NqOs9XFXrKL3v7PwxUOWD-uGfywUONxdCTfJZgBqXNAZ",
+    "domain": "www.perekrestok.ru",
+    "path": "/",
+    "expires": 1810007507,
+    "httpOnly": true,
+    "secure": false,
+    "sameSite": "None"
+  }
+]
