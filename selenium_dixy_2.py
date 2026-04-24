@@ -6,6 +6,8 @@ from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.common.action_chains import ActionChains
 from bs4 import BeautifulSoup
 from urllib.parse import urljoin
+import csv
+from datetime import datetime
 
 START_URL = "https://dixy.ru"
 
@@ -18,7 +20,7 @@ options.add_argument(
 options.add_argument(
     "--disable-dev-shm-usage"
 )  # используем неразделяемую память: используем обычную папку /tmp
-options.add_argument("--headless")  # запускаем в фоновом режиме
+# options.add_argument("--headless")  # запускаем в фоновом режиме
 
 driver = webdriver.Chrome(
     options=options
@@ -75,11 +77,16 @@ if links:
 else:
     print("Не удалось найти ссылки категорий по выбранному селектору.")
 
-print(f"Всего уникальных ссылок на категории: {len(category_urls)}")
+
 if category_urls:
-    for i, url in enumerate(category_urls, 1):
-        print(f"{i}. {url}")
+    filename = f"categories_{datetime.now().strftime('%Y%m%d_%H%M%S')}.csv"
+    with open(filename, "w", newline="", encoding="utf-8") as csvfile:
+        writer = csv.writer(csvfile)
+        writer.writerow(["index", "url"])  # заголовок
+        for idx, url in enumerate(category_urls, start=1):
+            writer.writerow([idx, url])
+    print(f"Ссылки на категории сохранены в файл: {filename}")
 else:
-    print("Ссылки не найдены.")
+    print("Нет ссылок для сохранения.")
 
 driver.quit()
