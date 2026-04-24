@@ -20,7 +20,7 @@ options.add_argument(
 options.add_argument(
     "--disable-dev-shm-usage"
 )  # используем неразделяемую память: используем обычную папку /tmp
-# options.add_argument("--headless")  # запускаем в фоновом режиме
+options.add_argument("--headless")  # запускаем в фоновом режиме
 
 driver = webdriver.Chrome(
     options=options
@@ -79,7 +79,7 @@ else:
 
 
 if category_urls:
-    filename = f"categories_{datetime.now().strftime('%Y%m%d_%H%M%S')}.csv"
+    filename = f"categories_{datetime.now().strftime('%Y%m%d')}.csv"
     with open(filename, "w", newline="", encoding="utf-8") as csvfile:
         writer = csv.writer(csvfile)
         writer.writerow(["index", "url"])  # заголовок
