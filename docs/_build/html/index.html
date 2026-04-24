@@ -1,0 +1,194 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="./">
+<head>
+  <meta charset="utf-8" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Документация Telegram-бота “grocery-bot” &mdash; grocery-bot 1.0.0 documentation</title>
+      <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=b86133f3" />
+      <link rel="stylesheet" type="text/css" href="_static/css/theme.css?v=19f00094" />
+
+  
+  <!--[if lt IE 9]>
+    <script src="_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script src="_static/jquery.js?v=5d32c60e"></script>
+        <script src="_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+        <script src="_static/documentation_options.js?v=8d563738"></script>
+        <script src="_static/doctools.js?v=888ff710"></script>
+        <script src="_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="Модуль handlers" href="modules/handlers.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="#" class="icon icon-home">
+            grocery-bot
+          </a>
+              <div class="version">
+                1.0.0
+              </div>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Основные модули:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="modules/handlers.html">Модуль handlers</a></li>
+<li class="toctree-l1"><a class="reference internal" href="modules/cart_calculator.html">Модуль cart_calculator</a></li>
+<li class="toctree-l1"><a class="reference internal" href="modules/price_fetcher.html">Модуль price_fetcher</a></li>
+<li class="toctree-l1"><a class="reference internal" href="modules/product_resolver.html">Модуль product_resolver</a></li>
+<li class="toctree-l1"><a class="reference internal" href="modules/keyboards.html">Модуль keyboards</a></li>
+<li class="toctree-l1"><a class="reference internal" href="modules/session_storage.html">Модуль session_storage</a></li>
+<li class="toctree-l1"><a class="reference internal" href="modules/config.html">Модуль config</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="#">grocery-bot</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="#" class="icon icon-home" aria-label="Home"></a></li>
+      <li class="breadcrumb-item active">Документация Telegram-бота “grocery-bot”</li>
+      <li class="wy-breadcrumbs-aside">
+            <a href="_sources/index.rst.txt" rel="nofollow"> View page source</a>
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <section id="telegram-grocery-bot">
+<h1>Документация Telegram-бота “grocery-bot”<a class="headerlink" href="#telegram-grocery-bot" title="Link to this heading"></a></h1>
+<p>Telegram-бот для поиска дешёвой продуктовой корзины.
+Бот принимает список продуктов, собирает цены с сайтов магазинов
+и показывает, где корзина будет дешевле.</p>
+<section id="id1">
+<h2>Команда разработчиков<a class="headerlink" href="#id1" title="Link to this heading"></a></h2>
+<ul class="simple">
+<li><p>Ердякова М.А.</p></li>
+<li><p>Козлова П.Д.</p></li>
+<li><p>Скорик Е.В.</p></li>
+</ul>
+</section>
+<section id="id2">
+<h2>Содержание<a class="headerlink" href="#id2" title="Link to this heading"></a></h2>
+<div class="toctree-wrapper compound">
+<p class="caption" role="heading"><span class="caption-text">Основные модули:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="modules/handlers.html">Модуль handlers</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="modules/handlers.html#bot.handlers.ask_next_ambiguous"><code class="docutils literal notranslate"><span class="pre">ask_next_ambiguous()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="modules/handlers.html#bot.handlers.calculate_and_send_result"><code class="docutils literal notranslate"><span class="pre">calculate_and_send_result()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="modules/handlers.html#bot.handlers.cancel_command"><code class="docutils literal notranslate"><span class="pre">cancel_command()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="modules/handlers.html#bot.handlers.handle_message"><code class="docutils literal notranslate"><span class="pre">handle_message()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="modules/handlers.html#bot.handlers.handle_selection"><code class="docutils literal notranslate"><span class="pre">handle_selection()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="modules/handlers.html#bot.handlers.help_command"><code class="docutils literal notranslate"><span class="pre">help_command()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="modules/handlers.html#bot.handlers.start_command"><code class="docutils literal notranslate"><span class="pre">start_command()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="modules/cart_calculator.html">Модуль cart_calculator</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="modules/cart_calculator.html#bot.core.cart_calculator.calculate_cart"><code class="docutils literal notranslate"><span class="pre">calculate_cart()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="modules/cart_calculator.html#bot.core.cart_calculator.format_comparison_message"><code class="docutils literal notranslate"><span class="pre">format_comparison_message()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="modules/price_fetcher.html">Модуль price_fetcher</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="modules/price_fetcher.html#bot.core.price_fetcher.get_all_prices_for_product"><code class="docutils literal notranslate"><span class="pre">get_all_prices_for_product()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="modules/price_fetcher.html#bot.core.price_fetcher.get_base_price"><code class="docutils literal notranslate"><span class="pre">get_base_price()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="modules/price_fetcher.html#bot.core.price_fetcher.get_product_price"><code class="docutils literal notranslate"><span class="pre">get_product_price()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="modules/product_resolver.html">Модуль product_resolver</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="modules/product_resolver.html#bot.core.product_resolver.is_ambiguous"><code class="docutils literal notranslate"><span class="pre">is_ambiguous()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="modules/product_resolver.html#bot.core.product_resolver.resolve_ambiguous_products"><code class="docutils literal notranslate"><span class="pre">resolve_ambiguous_products()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="modules/keyboards.html">Модуль keyboards</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="modules/keyboards.html#bot.keyboards.get_ambiguous_keyboard"><code class="docutils literal notranslate"><span class="pre">get_ambiguous_keyboard()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="modules/keyboards.html#bot.keyboards.get_confirm_keyboard"><code class="docutils literal notranslate"><span class="pre">get_confirm_keyboard()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="modules/session_storage.html">Модуль session_storage</a><ul>
+<li class="toctree-l2"><a class="reference internal" href="modules/session_storage.html#bot.storage.session_storage.create_session"><code class="docutils literal notranslate"><span class="pre">create_session()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="modules/session_storage.html#bot.storage.session_storage.delete_session"><code class="docutils literal notranslate"><span class="pre">delete_session()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="modules/session_storage.html#bot.storage.session_storage.get_session"><code class="docutils literal notranslate"><span class="pre">get_session()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="modules/session_storage.html#bot.storage.session_storage.session_exists"><code class="docutils literal notranslate"><span class="pre">session_exists()</span></code></a></li>
+<li class="toctree-l2"><a class="reference internal" href="modules/session_storage.html#bot.storage.session_storage.update_session"><code class="docutils literal notranslate"><span class="pre">update_session()</span></code></a></li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="modules/config.html">Модуль config</a></li>
+</ul>
+</div>
+</section>
+<section id="id3">
+<h2>Инструкция по использованию<a class="headerlink" href="#id3" title="Link to this heading"></a></h2>
+<ol class="arabic simple">
+<li><p>Отправьте боту команду /start</p></li>
+<li><p>Введите список продуктов через запятую (например: молоко, хлеб, яйца)</p></li>
+<li><p>При неоднозначных названиях бот предложит уточнить</p></li>
+<li><p>Получите сравнение цен по магазинам</p></li>
+</ol>
+</section>
+<section id="id4">
+<h2>Доступные команды<a class="headerlink" href="#id4" title="Link to this heading"></a></h2>
+<ul class="simple">
+<li><p>/start — начать работу</p></li>
+<li><p>/help — справка</p></li>
+<li><p>/cancel — отменить текущий заказ</p></li>
+</ul>
+</section>
+</section>
+
+
+           </div>
+          </div>
+          <footer><div class="rst-footer-buttons" role="navigation" aria-label="Footer">
+        <a href="modules/handlers.html" class="btn btn-neutral float-right" title="Модуль handlers" accesskey="n" rel="next">Next <span class="fa fa-arrow-circle-right" aria-hidden="true"></span></a>
+    </div>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2025, Ердякова М.А., Козлова П.Д., Скорик Е.В..</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>
