@@ -6,7 +6,6 @@ load_dotenv()
 BOT_TOKEN = os.getenv("BOT_TOKEN")
 DEBUG = os.getenv("DEBUG", "False").lower() == "true"
 
-
 STORES = {
     "Пятёрочка": {
         "price_coef": 1.0,

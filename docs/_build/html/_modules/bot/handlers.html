@@ -1,0 +1,307 @@
+<!DOCTYPE html>
+<html class="writer-html5" lang="en" data-content_root="../../">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>bot.handlers &mdash; grocery-bot 1.0.0 documentation</title>
+      <link rel="stylesheet" type="text/css" href="../../_static/pygments.css?v=b86133f3" />
+      <link rel="stylesheet" type="text/css" href="../../_static/css/theme.css?v=19f00094" />
+
+  
+  <!--[if lt IE 9]>
+    <script src="../../_static/js/html5shiv.min.js"></script>
+  <![endif]-->
+  
+        <script src="../../_static/jquery.js?v=5d32c60e"></script>
+        <script src="../../_static/_sphinx_javascript_frameworks_compat.js?v=2cd50e6c"></script>
+        <script src="../../_static/documentation_options.js?v=8d563738"></script>
+        <script src="../../_static/doctools.js?v=888ff710"></script>
+        <script src="../../_static/sphinx_highlight.js?v=dc90522c"></script>
+    <script src="../../_static/js/theme.js"></script>
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" /> 
+</head>
+
+<body class="wy-body-for-nav"> 
+  <div class="wy-grid-for-nav">
+    <nav data-toggle="wy-nav-shift" class="wy-nav-side">
+      <div class="wy-side-scroll">
+        <div class="wy-side-nav-search" >
+
+          
+          
+          <a href="../../index.html" class="icon icon-home">
+            grocery-bot
+          </a>
+              <div class="version">
+                1.0.0
+              </div>
+<div role="search">
+  <form id="rtd-search-form" class="wy-form" action="../../search.html" method="get">
+    <input type="text" name="q" placeholder="Search docs" aria-label="Search docs" />
+    <input type="hidden" name="check_keywords" value="yes" />
+    <input type="hidden" name="area" value="default" />
+  </form>
+</div>
+        </div><div class="wy-menu wy-menu-vertical" data-spy="affix" role="navigation" aria-label="Navigation menu">
+              <p class="caption" role="heading"><span class="caption-text">Основные модули:</span></p>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../modules/handlers.html">Модуль handlers</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../modules/cart_calculator.html">Модуль cart_calculator</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../modules/price_fetcher.html">Модуль price_fetcher</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../modules/product_resolver.html">Модуль product_resolver</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../modules/keyboards.html">Модуль keyboards</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../modules/session_storage.html">Модуль session_storage</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../modules/config.html">Модуль config</a></li>
+</ul>
+
+        </div>
+      </div>
+    </nav>
+
+    <section data-toggle="wy-nav-shift" class="wy-nav-content-wrap"><nav class="wy-nav-top" aria-label="Mobile navigation menu" >
+          <i data-toggle="wy-nav-top" class="fa fa-bars"></i>
+          <a href="../../index.html">grocery-bot</a>
+      </nav>
+
+      <div class="wy-nav-content">
+        <div class="rst-content">
+          <div role="navigation" aria-label="Page navigation">
+  <ul class="wy-breadcrumbs">
+      <li><a href="../../index.html" class="icon icon-home" aria-label="Home"></a></li>
+          <li class="breadcrumb-item"><a href="../index.html">Module code</a></li>
+      <li class="breadcrumb-item active">bot.handlers</li>
+      <li class="wy-breadcrumbs-aside">
+      </li>
+  </ul>
+  <hr/>
+</div>
+          <div role="main" class="document" itemscope="itemscope" itemtype="http://schema.org/Article">
+           <div itemprop="articleBody">
+             
+  <h1>Source code for bot.handlers</h1><div class="highlight"><pre>
+<span></span><span class="kn">import</span><span class="w"> </span><span class="nn">logging</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">telegram</span><span class="w"> </span><span class="kn">import</span> <span class="n">Update</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">telegram.ext</span><span class="w"> </span><span class="kn">import</span> <span class="n">ContextTypes</span><span class="p">,</span> <span class="n">CallbackQueryHandler</span>
+
+<span class="kn">from</span><span class="w"> </span><span class="nn">bot.core.product_resolver</span><span class="w"> </span><span class="kn">import</span> <span class="n">resolve_ambiguous_products</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">bot.core.cart_calculator</span><span class="w"> </span><span class="kn">import</span> <span class="n">calculate_cart</span><span class="p">,</span> <span class="n">format_comparison_message</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">bot.storage.session_storage</span><span class="w"> </span><span class="kn">import</span> <span class="n">create_session</span><span class="p">,</span> <span class="n">get_session</span><span class="p">,</span> <span class="n">update_session</span><span class="p">,</span> <span class="n">delete_session</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">bot.keyboards</span><span class="w"> </span><span class="kn">import</span> <span class="n">get_ambiguous_keyboard</span><span class="p">,</span> <span class="n">get_confirm_keyboard</span>
+
+<span class="n">logger</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">(</span><span class="vm">__name__</span><span class="p">)</span>
+
+
+<span class="n">user_carts</span> <span class="o">=</span> <span class="p">{}</span>
+
+<div class="viewcode-block" id="start_command">
+<a class="viewcode-back" href="../../modules/handlers.html#bot.handlers.start_command">[docs]</a>
+<span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">start_command</span><span class="p">(</span><span class="n">update</span><span class="p">:</span> <span class="n">Update</span><span class="p">,</span> <span class="n">context</span><span class="p">:</span> <span class="n">ContextTypes</span><span class="o">.</span><span class="n">DEFAULT_TYPE</span><span class="p">):</span>
+
+    <span class="n">user</span> <span class="o">=</span> <span class="n">update</span><span class="o">.</span><span class="n">effective_user</span>
+    <span class="k">await</span> <span class="n">update</span><span class="o">.</span><span class="n">message</span><span class="o">.</span><span class="n">reply_text</span><span class="p">(</span>
+        <span class="sa">f</span><span class="s2">&quot;Привет, </span><span class="si">{</span><span class="n">user</span><span class="o">.</span><span class="n">first_name</span><span class="si">}</span><span class="s2">!</span><span class="se">\n\n</span><span class="s2">&quot;</span>
+        <span class="s2">&quot;Я помогу тебе сравнить цены в разных магазинах и найти самую выгодную корзину.</span><span class="se">\n\n</span><span class="s2">&quot;</span>
+        <span class="s2">&quot;*Как это работает:*</span><span class="se">\n</span><span class="s2">&quot;</span>
+        <span class="s2">&quot;1. Отправь мне список продуктов (через запятую)</span><span class="se">\n</span><span class="s2">&quot;</span>
+        <span class="s2">&quot;2. Если какой-то товар описан размыто, я предложу уточнить</span><span class="se">\n</span><span class="s2">&quot;</span>
+        <span class="s2">&quot;3. Я сравню цены в Пятёрочке, Перекрёстке, Ленте, Самокате и Яндекс Лавке</span><span class="se">\n</span><span class="s2">&quot;</span>
+        <span class="s2">&quot;4. Получи результат с итоговой суммой и экономией</span><span class="se">\n\n</span><span class="s2">&quot;</span>
+        <span class="s2">&quot;*Пример:* `молоко, хлеб, яйца, сыр, масло`</span><span class="se">\n\n</span><span class="s2">&quot;</span>
+        <span class="s2">&quot;Готов? Отправляй список продуктов!&quot;</span><span class="p">,</span>
+        <span class="n">parse_mode</span><span class="o">=</span><span class="s2">&quot;Markdown&quot;</span>
+    <span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="help_command">
+<a class="viewcode-back" href="../../modules/handlers.html#bot.handlers.help_command">[docs]</a>
+<span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">help_command</span><span class="p">(</span><span class="n">update</span><span class="p">:</span> <span class="n">Update</span><span class="p">,</span> <span class="n">context</span><span class="p">:</span> <span class="n">ContextTypes</span><span class="o">.</span><span class="n">DEFAULT_TYPE</span><span class="p">):</span>
+
+    <span class="k">await</span> <span class="n">update</span><span class="o">.</span><span class="n">message</span><span class="o">.</span><span class="n">reply_text</span><span class="p">(</span>
+        <span class="s2">&quot;*Справка*</span><span class="se">\n\n</span><span class="s2">&quot;</span>
+        <span class="s2">&quot;• Отправь список продуктов через запятую</span><span class="se">\n</span><span class="s2">&quot;</span>
+        <span class="s2">&quot;• Можно указывать количество: &#39;2 яйца&#39;, &#39;500г сыра&#39;</span><span class="se">\n</span><span class="s2">&quot;</span>
+        <span class="s2">&quot;• Размытые товары (например, &#39;молоко&#39;) будут уточнены</span><span class="se">\n</span><span class="s2">&quot;</span>
+        <span class="s2">&quot;• Команда /start — начать заново</span><span class="se">\n</span><span class="s2">&quot;</span>
+        <span class="s2">&quot;• Команда /cancel — отменить текущий заказ</span><span class="se">\n\n</span><span class="s2">&quot;</span>
+        <span class="s2">&quot;*Доступные магазины:*</span><span class="se">\n</span><span class="s2">&quot;</span>
+        <span class="s2">&quot;• Пятёрочка</span><span class="se">\n</span><span class="s2">&quot;</span>
+        <span class="s2">&quot;• Перекрёсток</span><span class="se">\n</span><span class="s2">&quot;</span>
+        <span class="s2">&quot;• Лента</span><span class="se">\n</span><span class="s2">&quot;</span>
+        <span class="s2">&quot;• Самокат</span><span class="se">\n</span><span class="s2">&quot;</span>
+        <span class="s2">&quot;• Яндекс Лавка&quot;</span><span class="p">,</span>
+        <span class="n">parse_mode</span><span class="o">=</span><span class="s2">&quot;Markdown&quot;</span>
+    <span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="cancel_command">
+<a class="viewcode-back" href="../../modules/handlers.html#bot.handlers.cancel_command">[docs]</a>
+<span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">cancel_command</span><span class="p">(</span><span class="n">update</span><span class="p">:</span> <span class="n">Update</span><span class="p">,</span> <span class="n">context</span><span class="p">:</span> <span class="n">ContextTypes</span><span class="o">.</span><span class="n">DEFAULT_TYPE</span><span class="p">):</span>
+
+    <span class="n">user_id</span> <span class="o">=</span> <span class="n">update</span><span class="o">.</span><span class="n">effective_user</span><span class="o">.</span><span class="n">id</span>
+    <span class="n">delete_session</span><span class="p">(</span><span class="n">user_id</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">user_id</span> <span class="ow">in</span> <span class="n">user_carts</span><span class="p">:</span>
+        <span class="k">del</span> <span class="n">user_carts</span><span class="p">[</span><span class="n">user_id</span><span class="p">]</span>
+    <span class="k">await</span> <span class="n">update</span><span class="o">.</span><span class="n">message</span><span class="o">.</span><span class="n">reply_text</span><span class="p">(</span>
+        <span class="s2">&quot;Действие отменено. Чтобы начать заново, отправь новый список продуктов.&quot;</span>
+    <span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="handle_message">
+<a class="viewcode-back" href="../../modules/handlers.html#bot.handlers.handle_message">[docs]</a>
+<span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">handle_message</span><span class="p">(</span><span class="n">update</span><span class="p">:</span> <span class="n">Update</span><span class="p">,</span> <span class="n">context</span><span class="p">:</span> <span class="n">ContextTypes</span><span class="o">.</span><span class="n">DEFAULT_TYPE</span><span class="p">):</span>
+
+    <span class="n">user_id</span> <span class="o">=</span> <span class="n">update</span><span class="o">.</span><span class="n">effective_user</span><span class="o">.</span><span class="n">id</span>
+    <span class="n">text</span> <span class="o">=</span> <span class="n">update</span><span class="o">.</span><span class="n">message</span><span class="o">.</span><span class="n">text</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span>
+    
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">text</span><span class="p">:</span>
+        <span class="k">await</span> <span class="n">update</span><span class="o">.</span><span class="n">message</span><span class="o">.</span><span class="n">reply_text</span><span class="p">(</span><span class="s2">&quot;Пожалуйста, отправь список продуктов через запятую.&quot;</span><span class="p">)</span>
+        <span class="k">return</span>
+    
+
+    <span class="n">products</span> <span class="o">=</span> <span class="p">[</span><span class="n">p</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span> <span class="k">for</span> <span class="n">p</span> <span class="ow">in</span> <span class="n">text</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot;,&quot;</span><span class="p">)</span> <span class="k">if</span> <span class="n">p</span><span class="o">.</span><span class="n">strip</span><span class="p">()]</span>
+    
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">products</span><span class="p">:</span>
+        <span class="k">await</span> <span class="n">update</span><span class="o">.</span><span class="n">message</span><span class="o">.</span><span class="n">reply_text</span><span class="p">(</span><span class="s2">&quot;Не удалось распознать список. Попробуй ещё раз.&quot;</span><span class="p">)</span>
+        <span class="k">return</span>
+    
+    <span class="n">logger</span><span class="o">.</span><span class="n">info</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;User </span><span class="si">{</span><span class="n">user_id</span><span class="si">}</span><span class="s2"> sent products: </span><span class="si">{</span><span class="n">products</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+    
+
+    <span class="n">ambiguous_map</span> <span class="o">=</span> <span class="n">resolve_ambiguous_products</span><span class="p">(</span><span class="n">products</span><span class="p">)</span>
+    <span class="n">ambiguous_items</span> <span class="o">=</span> <span class="p">{</span><span class="n">k</span><span class="p">:</span> <span class="n">v</span> <span class="k">for</span> <span class="n">k</span><span class="p">,</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">ambiguous_map</span><span class="o">.</span><span class="n">items</span><span class="p">()</span> <span class="k">if</span> <span class="n">v</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">}</span>
+    
+    <span class="k">if</span> <span class="n">ambiguous_items</span><span class="p">:</span>
+
+        <span class="n">session_data</span> <span class="o">=</span> <span class="p">{</span>
+            <span class="s2">&quot;original_products&quot;</span><span class="p">:</span> <span class="n">products</span><span class="p">,</span>
+            <span class="s2">&quot;ambiguous_map&quot;</span><span class="p">:</span> <span class="n">ambiguous_items</span><span class="p">,</span>
+            <span class="s2">&quot;resolved_products&quot;</span><span class="p">:</span> <span class="p">{</span><span class="n">k</span><span class="p">:</span> <span class="kc">None</span> <span class="k">for</span> <span class="n">k</span> <span class="ow">in</span> <span class="n">ambiguous_items</span><span class="o">.</span><span class="n">keys</span><span class="p">()},</span>
+            <span class="s2">&quot;step&quot;</span><span class="p">:</span> <span class="mi">0</span><span class="p">,</span>
+            <span class="s2">&quot;clear_products&quot;</span><span class="p">:</span> <span class="p">[</span><span class="n">p</span> <span class="k">for</span> <span class="n">p</span> <span class="ow">in</span> <span class="n">products</span> <span class="k">if</span> <span class="n">p</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">ambiguous_items</span><span class="p">]</span>
+        <span class="p">}</span>
+        <span class="n">create_session</span><span class="p">(</span><span class="n">user_id</span><span class="p">,</span> <span class="n">session_data</span><span class="p">)</span>
+        
+        <span class="k">await</span> <span class="n">ask_next_ambiguous</span><span class="p">(</span><span class="n">update</span><span class="p">,</span> <span class="n">context</span><span class="p">,</span> <span class="n">user_id</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="k">await</span> <span class="n">calculate_and_send_result</span><span class="p">(</span><span class="n">update</span><span class="p">,</span> <span class="n">context</span><span class="p">,</span> <span class="n">products</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="ask_next_ambiguous">
+<a class="viewcode-back" href="../../modules/handlers.html#bot.handlers.ask_next_ambiguous">[docs]</a>
+<span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">ask_next_ambiguous</span><span class="p">(</span><span class="n">update</span><span class="p">:</span> <span class="n">Update</span><span class="p">,</span> <span class="n">context</span><span class="p">:</span> <span class="n">ContextTypes</span><span class="o">.</span><span class="n">DEFAULT_TYPE</span><span class="p">,</span> <span class="n">user_id</span><span class="p">:</span> <span class="nb">int</span><span class="p">):</span>
+    <span class="n">session</span> <span class="o">=</span> <span class="n">get_session</span><span class="p">(</span><span class="n">user_id</span><span class="p">)</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">session</span><span class="p">:</span>
+        <span class="k">return</span>
+    
+    <span class="n">ambiguous_items</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">session</span><span class="p">[</span><span class="s2">&quot;ambiguous_map&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">items</span><span class="p">())</span>
+    <span class="n">current_step</span> <span class="o">=</span> <span class="n">session</span><span class="p">[</span><span class="s2">&quot;step&quot;</span><span class="p">]</span>
+    
+    <span class="k">if</span> <span class="n">current_step</span> <span class="o">&gt;=</span> <span class="nb">len</span><span class="p">(</span><span class="n">ambiguous_items</span><span class="p">):</span>
+        <span class="n">final_products</span> <span class="o">=</span> <span class="n">session</span><span class="p">[</span><span class="s2">&quot;clear_products&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
+        <span class="k">for</span> <span class="n">orig</span><span class="p">,</span> <span class="n">chosen</span> <span class="ow">in</span> <span class="n">session</span><span class="p">[</span><span class="s2">&quot;resolved_products&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+            <span class="k">if</span> <span class="n">chosen</span><span class="p">:</span>
+                <span class="n">final_products</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">chosen</span><span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">final_products</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">session</span><span class="p">[</span><span class="s2">&quot;ambiguous_map&quot;</span><span class="p">][</span><span class="n">orig</span><span class="p">][</span><span class="mi">0</span><span class="p">])</span>
+        
+        <span class="n">delete_session</span><span class="p">(</span><span class="n">user_id</span><span class="p">)</span>
+        <span class="k">await</span> <span class="n">calculate_and_send_result</span><span class="p">(</span><span class="n">update</span><span class="p">,</span> <span class="n">context</span><span class="p">,</span> <span class="n">final_products</span><span class="p">)</span>
+        <span class="k">return</span>
+    
+    <span class="n">original_product</span><span class="p">,</span> <span class="n">variants</span> <span class="o">=</span> <span class="n">ambiguous_items</span><span class="p">[</span><span class="n">current_step</span><span class="p">]</span>
+    
+    <span class="kn">from</span><span class="w"> </span><span class="nn">bot.keyboards</span><span class="w"> </span><span class="kn">import</span> <span class="n">get_ambiguous_keyboard</span>
+    <span class="n">reply_markup</span> <span class="o">=</span> <span class="n">get_ambiguous_keyboard</span><span class="p">(</span><span class="n">original_product</span><span class="p">,</span> <span class="n">variants</span><span class="p">)</span>
+    
+    <span class="k">await</span> <span class="n">update</span><span class="o">.</span><span class="n">message</span><span class="o">.</span><span class="n">reply_text</span><span class="p">(</span>
+        <span class="sa">f</span><span class="s2">&quot;Уточните, пожалуйста, что вы имеете в виду под «</span><span class="si">{</span><span class="n">original_product</span><span class="si">}</span><span class="s2">»:&quot;</span><span class="p">,</span>
+        <span class="n">reply_markup</span><span class="o">=</span><span class="n">reply_markup</span>
+    <span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="handle_selection">
+<a class="viewcode-back" href="../../modules/handlers.html#bot.handlers.handle_selection">[docs]</a>
+<span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">handle_selection</span><span class="p">(</span><span class="n">update</span><span class="p">:</span> <span class="n">Update</span><span class="p">,</span> <span class="n">context</span><span class="p">:</span> <span class="n">ContextTypes</span><span class="o">.</span><span class="n">DEFAULT_TYPE</span><span class="p">):</span>
+    <span class="n">query</span> <span class="o">=</span> <span class="n">update</span><span class="o">.</span><span class="n">callback_query</span>
+    <span class="k">await</span> <span class="n">query</span><span class="o">.</span><span class="n">answer</span><span class="p">()</span>
+    
+    <span class="n">user_id</span> <span class="o">=</span> <span class="n">query</span><span class="o">.</span><span class="n">from_user</span><span class="o">.</span><span class="n">id</span>
+    <span class="n">data</span> <span class="o">=</span> <span class="n">query</span><span class="o">.</span><span class="n">data</span>
+    
+    <span class="n">session</span> <span class="o">=</span> <span class="n">get_session</span><span class="p">(</span><span class="n">user_id</span><span class="p">)</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">session</span><span class="p">:</span>
+        <span class="k">await</span> <span class="n">query</span><span class="o">.</span><span class="n">edit_message_text</span><span class="p">(</span><span class="s2">&quot;⏰ Сессия истекла. Отправьте список заново.&quot;</span><span class="p">)</span>
+        <span class="k">return</span>
+    
+    <span class="k">if</span> <span class="n">data</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s2">&quot;select_&quot;</span><span class="p">):</span>
+        <span class="n">_</span><span class="p">,</span> <span class="n">original</span><span class="p">,</span> <span class="n">chosen</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot;_&quot;</span><span class="p">,</span> <span class="mi">2</span><span class="p">)</span>
+        <span class="n">session</span><span class="p">[</span><span class="s2">&quot;resolved_products&quot;</span><span class="p">][</span><span class="n">original</span><span class="p">]</span> <span class="o">=</span> <span class="n">chosen</span>
+        <span class="n">session</span><span class="p">[</span><span class="s2">&quot;step&quot;</span><span class="p">]</span> <span class="o">+=</span> <span class="mi">1</span>
+        <span class="n">update_session</span><span class="p">(</span><span class="n">user_id</span><span class="p">,</span> <span class="n">session</span><span class="p">)</span>
+        
+        <span class="k">await</span> <span class="n">query</span><span class="o">.</span><span class="n">edit_message_text</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Выбрано: </span><span class="si">{</span><span class="n">chosen</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+        
+        <span class="k">await</span> <span class="n">ask_next_ambiguous</span><span class="p">(</span><span class="n">query</span><span class="p">,</span> <span class="n">context</span><span class="p">,</span> <span class="n">user_id</span><span class="p">)</span>
+    
+    <span class="k">elif</span> <span class="n">data</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s2">&quot;skip_&quot;</span><span class="p">):</span>
+        <span class="n">_</span><span class="p">,</span> <span class="n">original</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot;_&quot;</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
+        <span class="n">session</span><span class="p">[</span><span class="s2">&quot;resolved_products&quot;</span><span class="p">][</span><span class="n">original</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="n">session</span><span class="p">[</span><span class="s2">&quot;step&quot;</span><span class="p">]</span> <span class="o">+=</span> <span class="mi">1</span>
+        <span class="n">update_session</span><span class="p">(</span><span class="n">user_id</span><span class="p">,</span> <span class="n">session</span><span class="p">)</span>
+        
+        <span class="k">await</span> <span class="n">query</span><span class="o">.</span><span class="n">edit_message_text</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Пропущено, будет выбран первый вариант&quot;</span><span class="p">)</span>
+        <span class="k">await</span> <span class="n">ask_next_ambiguous</span><span class="p">(</span><span class="n">query</span><span class="p">,</span> <span class="n">context</span><span class="p">,</span> <span class="n">user_id</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="calculate_and_send_result">
+<a class="viewcode-back" href="../../modules/handlers.html#bot.handlers.calculate_and_send_result">[docs]</a>
+<span class="k">async</span> <span class="k">def</span><span class="w"> </span><span class="nf">calculate_and_send_result</span><span class="p">(</span><span class="n">update</span><span class="p">:</span> <span class="n">Update</span><span class="p">,</span> <span class="n">context</span><span class="p">:</span> <span class="n">ContextTypes</span><span class="o">.</span><span class="n">DEFAULT_TYPE</span><span class="p">,</span> <span class="n">products_list</span><span class="p">):</span>
+
+    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">update</span><span class="p">,</span> <span class="n">Update</span><span class="p">)</span> <span class="ow">and</span> <span class="n">update</span><span class="o">.</span><span class="n">message</span><span class="p">:</span>
+        <span class="k">await</span> <span class="n">update</span><span class="o">.</span><span class="n">message</span><span class="o">.</span><span class="n">reply_text</span><span class="p">(</span><span class="s2">&quot;Рассчитываю стоимость корзины...&quot;</span><span class="p">)</span>
+    <span class="k">elif</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">update</span><span class="p">,</span> <span class="s1">&#39;edit_message_text&#39;</span><span class="p">):</span>
+        <span class="k">await</span> <span class="n">update</span><span class="o">.</span><span class="n">edit_message_text</span><span class="p">(</span><span class="s2">&quot;Рассчитываю стоимость корзины...&quot;</span><span class="p">)</span>
+    
+    <span class="n">cart_results</span> <span class="o">=</span> <span class="n">calculate_cart</span><span class="p">(</span><span class="n">products_list</span><span class="p">)</span>
+    
+    <span class="n">message</span> <span class="o">=</span> <span class="n">format_comparison_message</span><span class="p">(</span><span class="n">cart_results</span><span class="p">)</span>
+    
+    <span class="n">products_text</span> <span class="o">=</span> <span class="s2">&quot;</span><span class="se">\n\n</span><span class="s2">📋 *Ваш список:*</span><span class="se">\n</span><span class="s2">&quot;</span> <span class="o">+</span> <span class="s2">&quot;</span><span class="se">\n</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;• </span><span class="si">{</span><span class="n">p</span><span class="si">}</span><span class="s2">&quot;</span> <span class="k">for</span> <span class="n">p</span> <span class="ow">in</span> <span class="n">products_list</span><span class="p">)</span>
+    <span class="n">message</span> <span class="o">+=</span> <span class="n">products_text</span>
+    
+    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">update</span><span class="p">,</span> <span class="n">Update</span><span class="p">)</span> <span class="ow">and</span> <span class="n">update</span><span class="o">.</span><span class="n">message</span><span class="p">:</span>
+        <span class="k">await</span> <span class="n">update</span><span class="o">.</span><span class="n">message</span><span class="o">.</span><span class="n">reply_text</span><span class="p">(</span><span class="n">message</span><span class="p">,</span> <span class="n">parse_mode</span><span class="o">=</span><span class="s2">&quot;Markdown&quot;</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="k">await</span> <span class="n">update</span><span class="o">.</span><span class="n">edit_message_text</span><span class="p">(</span><span class="n">message</span><span class="p">,</span> <span class="n">parse_mode</span><span class="o">=</span><span class="s2">&quot;Markdown&quot;</span><span class="p">)</span></div>
+
+</pre></div>
+
+           </div>
+          </div>
+          <footer>
+
+  <hr/>
+
+  <div role="contentinfo">
+    <p>&#169; Copyright 2025, Ердякова М.А., Козлова П.Д., Скорик Е.В..</p>
+  </div>
+
+  Built with <a href="https://www.sphinx-doc.org/">Sphinx</a> using a
+    <a href="https://github.com/readthedocs/sphinx_rtd_theme">theme</a>
+    provided by <a href="https://readthedocs.org">Read the Docs</a>.
+   
+
+</footer>
+        </div>
+      </div>
+    </section>
+  </div>
+  <script>
+      jQuery(function () {
+          SphinxRtdTheme.Navigation.enable(true);
+      });
+  </script> 
+
+</body>
+</html>
