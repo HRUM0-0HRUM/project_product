@@ -38,7 +38,11 @@ class ProductParser:
     def find_catalog(self):
         self.driver.get(self.start_url)  # открываем нужную нам ссылку
 
-        self.driver.add_cookie({"name": "session_id", "value": "123456abcdef"}) # установка cookies
+        with open('cookies.txt', 'r', encoding='utf-8') as file_cookies:
+            for line in file_cookies:
+                line = line.strip()
+                values = line.split(', ')
+                self.driver.add_cookie({"name": values[0], "value": values[1]}) # установка cookies
 
         self.driver.refresh() # обновление страницы для установки cookies (refresh перезапрашивает еткущий url)
         # не можем установить cookies раньше, чем загрузим нужную страницу
