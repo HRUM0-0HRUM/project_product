@@ -11,6 +11,8 @@ import csv
 from datetime import datetime
 import requests, re, random
 import pandas as pd
+from selenium.common.exceptions import NoSuchElementException
+import inspect
 
 START_URL = "https://dixy.ru"
 
@@ -34,21 +36,25 @@ class ProductParser:
         self.catalog_link = None
         self.category_urls = []
         self.products_links = []
+        self.products_data = []
+        self.path_to_proxy_txt = './proxy.txt'
 
     def find_catalog(self):
-        self.driver.get(self.start_url)  # открываем нужную нам ссылку
-
+        try:
+            self.driver.get(self.start_url)  # selenium запускает реальный браузер в котором открывает сайт дикси
+        except Exception as e:
+            raise(f"Что-то пошло не так при попытке загрузить сайт Дикси!")
+            
         with open('cookies.txt', 'r', encoding='utf-8') as file_cookies:
             for line in file_cookies:
-                line = line.strip()
+                line = line.strip() # strip удаляет любые пробельные символы c начала и конца строки
                 values = line.split(', ')
                 self.driver.add_cookie({"name": values[0], "value": values[1]}) # установка cookies
 
         self.driver.refresh() # обновление страницы для установки cookies (refresh перезапрашивает еткущий url)
         # не можем установить cookies раньше, чем загрузим нужную страницу
-
         # устанавливаем время ожидания загрузки страницы
-        wait = WebDriverWait(self.driver, 15)
+        wait = WebDriverWait(self.driver, random.uniform(15.0, 17.0))
 
         """
         1. Ждём появления ссылки "Каталог" в DOM (не обязательно кликабельной)
@@ -68,9 +74,9 @@ class ProductParser:
                 )
             )
         except TimeoutException:
-            print("Ссылка на каталог Дикси не найдена!")
+            raise(f"Ссылка на каталог Дикси не найдена!")
 
-        time.sleep(1)  # пауза для завершения анимаций, загрузку страницы
+        time.sleep(random.uniform(1.0, 5.0))  # пауза для завершения анимаций, загрузку страницы
 
         """
         открываем меню наведением мыши
@@ -78,47 +84,84 @@ class ProductParser:
         move_to_element перемещает мышь на элемент catalog_link
         perform последовательно с задержками отправляет событие наведения мыши на элемент
         """
+
         try:
             ActionChains(self.driver).move_to_element(self.catalog_link).perform()
-            print("Выполнено наведение мыши")
         except Exception as e:
-            print(f"Не удалось перейти по ссылке на каталог Дикси: {e}")
+            raise(f"Не удалось перейти по ссылке на каталог Дикси: {e}.")
 
-        time.sleep(2)  # дополнительная задержка для появления меню с категориями
+        time.sleep(random.uniform(1.0, 5.0))  # дополнительная задержка для появления меню с категориями
 
-        try:
-            self.__links_process()
-        except Exception as e:
-            print(f"Ошибка при обработке ссылок на категории в Дикси: {e}")
+        self.__links_process()
 
-        try:
-            self.__products_links_gathering()
-        except Exception as e:
-            print(f"Ошибка при обработке ссылок на продукты в Дикси: {e}")
+        time.sleep(random.uniform(1.0, 5.0))
 
+        self.__products_links_gathering()
+
+        time.sleep(random.uniform(1.0, 5.0))
+
+        self.__get_products_data()
+
+        self.driver.quit()
+
+    def __choose_random_ip(self):
+        with open(self.path_to_proxy_txt, 'r') as f:
+            proxies = [line.strip() for line in f]
+
+        ip = random.choice(proxies) if proxies else None
+        
+    
+    def __links_process(self):
+            # на момент выполнения этого метода мы уже перешли в каталог дикси
+
+            # wait = WebDriverWait(self.driver, random.uniform(15.0, 17.0))
+            # wait.until(EC.presence_of_element_located((By.CSS_SELECTOR, "div.catalog__list a")))
+
+            soup = BeautifulSoup(self.driver.page_source, "html.parser")
+            
+            main_tag = soup.find('div', class_='catalog-menu')
+            if main_tag is None:
+                # RunTimeError - ошибка времени выполнения, то есть ошибка во время выполнения программы
+                # используется, так как данная ошибка не подходит под другие более конкретные категории ошибок и исключений
+                raise RuntimeError(f"Каталог не найден. Поиск осуществлялся через тег div с классом catalog__list!")
+            
+            try:
+                catalog_links = main_tag.find_all('a', class_='link')
+            except NoSuchElementException:
+                raise RuntimeError(f"Внутри каталога не найдены теги a для поиска ссылок на категории товаров!")
+            
+            self.category_urls = [urljoin(START_URL, a.get('href')) for a in catalog_links if a.get('href')]
+
+    
     def __products_links_gathering(self):
-   
-        if self.category_urls:
-            for url in self.category_urls:
-                if url.count("/") == 6:
+        # здесь, используя ссылки на категории, мы собираем ссылки на продукты
+        if not self.category_urls:
+            raise RuntimeError(f"Невозможно собрать ссылки на продукты в Дикси, так как ссылки на категории отсутствуют! ")
 
-                    self.driver.get(url)
+        filename = f"categories_dixy{datetime.now().strftime('%Y-%m-%d %H:%M:%s')}.csv"
+        with open(filename, "w", newline="", encoding="utf-8") as csvfile:
+            writer = csv.writer(csvfile)
+            writer.writerow(["index", "url"])  # заголовок
+            for idx, url in enumerate(self.category_urls, start=1):
+                writer.writerow([idx, url])
 
-                    # wait = WebDriverWait(self.driver, 15)
+        for url in self.category_urls:
+            if url.count('/') == 6:
+                self.driver.get(url)
+                safe_url = re.sub(r'[^a-zA-Z0-9.]', '_', url)
 
-                    soup = BeautifulSoup(self.driver.page_source, "html.parser")
+                wait = WebDriverWait(self.driver, random.uniform(15.0, 17.0))
+                try:
+                    wait.until(EC.presence_of_element_located((By.CSS_SELECTOR, ".listing__cards")))  # или другой контейнер
+                    all_links = self.driver.find_elements(By.XPATH, "//a[@class='card__link']")
+                except Exception as e:
+                    raise RuntimeError(f"Чето пошло не так при попытке найти ссылки на товары в категории {url}. Ошибка: {e}.")
 
-                    selector = "a.card__link"
+                self.products_links.extend([urljoin(START_URL, link.get_attribute("href")) for link in all_links if link.get_attribute("href")])
 
-                    all_links = soup.select(selector)
-                    if all_links:
-                        self.products_links = [urljoin(START_URL, link.get("href")) for link in all_links if link.get("href") and link.get("href") != "#" and not link.get("href").startswith("javascript")]
-                    else:
-                        print(f"Не удалось найти товары на странице: {url}!")
+                time.sleep(random.uniform(5, 10))
 
-                    time.sleep(random.uniform(5, 10))
-
-                    '''
+                '''
                     try:
                         all_links = wait.until(
                             EC.presence_of_all_elements_located(
@@ -132,43 +175,88 @@ class ProductParser:
                         print(
                             f"Не удалось собрать ссылки на продукты в категории: {url}!"
                         )
-                    '''
-                    
+                    '''   
 
-            if self.products_links:
-                filename = f"products_dixy.csv"
-                with open(filename, "w", newline="", encoding="utf-8") as csvfile:
-                    writer = csv.writer(csvfile)
-                    writer.writerow(["index", "url"])  # заголовок
-                    for idx, url in enumerate(self.products_links, start=1):
-                        writer.writerow([idx, url])
+        if not self.products_links:
+            raise RuntimeError(f"Нет ссылок на продукты для сохранения ни в одной из категорий.")
+        
+        filename = f"products_dixy{datetime.now().strftime('%Y-%m-%d')}.csv"
+        with open(filename, "w", newline="", encoding="utf-8") as csvfile:
+            writer = csv.writer(csvfile)
+            writer.writerow(["index", "url"])  # заголовок
+            for idx, url in enumerate(self.products_links, start=1):
+                writer.writerow([idx, url])
 
+
+    def __get_products_data(self):
+        characteristics = {'название', 'цена_без_скидки', 'скидка_по_карте', 'размер_скидки'}
+        temp_products_data = []
+
+        for link in self.products_links:
+            product = {}
+                
+            self.driver.get(link)
+            wait = WebDriverWait(self.driver, random.uniform(15.0, 17.0))
+            try:
+                wait.until(EC.presence_of_all_elements_located((By.XPATH, "//a[@class='card__link']")))
+            except TimeoutException:
+                raise RuntimeError(f"Чето пошло не так при попытке найти ссылки на товары в категории {link}.")
+            
+            soup = BeautifulSoup(self.driver.page_source, "html.parser")
+            # название товара
+            name = soup.find('h1', class_='detail-card__title open')
+            if name:
+                name = name.get_text(strip=True)   # очищает от пробелов и переносов
             else:
-                raise Exception("Нет ссылок для сохранения ссылок на продукты.")
+                name = None
+            product['название'] = name
 
-        else:
-            raise Exception("Невозможно собрать ссылки на продукты в Дикси, \
-                  так как ссылки на категории отсутствуют!")
+            # цена товара
+            price = soup.find('div', class_='card__price-num')
+            if price:
+                first_part = price.get_text(strip=True)
+                second_part = price.find("span").get_text(strip=True)
+                price = int(first_part + second_part)
+            else:
+                price = None
+            product['цена_без_скидки'] = price
 
-        self.driver.quit()
+            # есть ли на товар скидка по карте и какая
+            discount = soup.find('div', class_='badge violet violet-title')
+            if discount:
+                persentage = discount.find("span").get_text(strip=True)
+                persentage = re.search(r'(\d+)%', persentage)
+                discount = True
+            else:
+                discount = False
+                persentage = None
+            product['скидка_по_карте'] = discount
+            product['размер_скидки'] = persentage
 
-    def __links_process(self):
-        soup = BeautifulSoup(self.driver.page_source, "html.parser")
+            # получение всех остальных характеристик
+            parent = soup.find("div", class_="detail-data__holder list list-top")
+            lines = parent.find_all("div", class_="list__line")
 
-        selector = ".catalog-menu a"  # класс catalog-menu, в нем ищем все теги a
+            for line in lines:
+                # Получаем все span внутри этой строки
+                spans = line.find_all("span")
+                label = spans[0].get_text(strip=True)   # первый span
+                value = spans[1].get_text(strip=True)   # второй span
+                product[label] = value
+                characteristics.add(label)
 
-        links = soup.select(selector)
-        if links:
-            self.category_urls = [urljoin(START_URL, link.get("href")) for link in links if link.get("href") and link.get("href") != "#" and not link.get("href").startswith("javascript")]
-            # for a in links:
-            #     href = a.get("href")
-            #     if href and href != "#" and not href.startswith("javascript"):
-            #         full_url = urljoin(START_URL, href)
-            #         self.category_urls.append(full_url)
-        else:
-            raise Exception(
-                "Не удалось найти ссылки категорий по выбранному селектору в Дикси."
-            )
+            temp_products_data.append(product)
+            
+        characteristics = list(characteristics)
+        for row in temp_products_data:
+            full_row = {key: "" for key in characteristics}   # все колонки с пустыми строками
+            full_row.update(row)                      # заполняем тем, что есть
+            self.products_data.append(full_row)
+
+        with open("products.csv", "w", newline="", encoding="utf-8-sig") as f:
+            writer = csv.DictWriter(f, fieldnames=characteristics)
+            writer.writeheader()
+            writer.writerows(self.products_data)
 
 
 def get_products():
